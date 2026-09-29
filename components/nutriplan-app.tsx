@@ -1,0 +1,85 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import {
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  CalendarDays,
+  Check,
+  ChevronDown,
+  CircleDollarSign,
+  ClipboardList,
+  Edit3,
+  Leaf,
+  Menu,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Settings2,
+  SlidersHorizontal,
+  Sparkles,
+  Trash2,
+  Utensils,
+  Users,
+  X,
+} from 'lucide-react'
+
+type Food = { name: string; category: string; serving: string; price: number; available: string; diet: string; nutrition: string }
+
+const foodsSeed: Food[] = [
+  { name: 'Rice', category: 'Grain', serving: '100 g', price: 5, available: '500 kg', diet: 'Vegetarian', nutrition: '130 kcal · 2.7g protein' },
+  { name: 'Idli', category: 'Breakfast', serving: '3 pcs', price: 12, available: '1,200 pcs', diet: 'Vegetarian', nutrition: '174 kcal · 5g protein' },
+  { name: 'Dal Tadka', category: 'Pulse', serving: '150 g', price: 18, available: '80 kg', diet: 'Vegetarian', nutrition: '210 kcal · 12g protein' },
+  { name: 'Chana Curry', category: 'Curry', serving: '100 g', price: 11, available: '500 kg', diet: 'Vegetarian', nutrition: '164 kcal · 8.9g protein' },
+  { name: 'Vegetable Curry', category: 'Curry', serving: '120 g', price: 14, available: '65 kg', diet: 'Vegetarian', nutrition: '118 kcal · 4g protein' },
+  { name: 'Chapati', category: 'Bread', serving: '2 pcs', price: 9, available: '2,000 pcs', diet: 'Vegetarian', nutrition: '146 kcal · 5g protein' },
+  { name: 'Curd', category: 'Dairy', serving: '100 ml', price: 8, available: '40 L', diet: 'Vegetarian', nutrition: '61 kcal · 3.5g protein' },
+  { name: 'Banana', category: 'Fruit', serving: '1 pc', price: 6, available: '800 pcs', diet: 'Vegetarian', nutrition: '89 kcal · 1.1g protein' },
+]
+
+const menu = [
+  ['Monday', 'Idli', 'Rice + Dal', 'Chana Curry'], ['Tuesday', 'Upma', 'Rice + Sambar', 'Vegetable Curry'], ['Wednesday', 'Pongal', 'Chapati + Dal', 'Vegetable Curry'], ['Thursday', 'Dosa', 'Rice + Dal', 'Chana Curry'], ['Friday', 'Ragi Dosa', 'Vegetable Rice', 'Peas Curry'], ['Saturday', 'Idli', 'Lemon Rice', 'Leafy Vegetable Curry'], ['Sunday', 'Puri', 'Rice + Sambar', 'Chana Curry'],
+]
+const nutrients = [
+  { label: 'Calories', value: '1,365', target: '1,500 kcal', percent: 91, tone: 'amber' },
+  { label: 'Protein', value: '42.3', target: '45 g', percent: 94, tone: 'amber' },
+  { label: 'Iron', value: '8.16', target: '12 mg', percent: 68, tone: 'red' },
+  { label: 'Calcium', value: '400.5', target: '450 mg', percent: 89, tone: 'amber' },
+  { label: 'Fiber', value: '26.2', target: '25 g', percent: 105, tone: 'green' },
+]
+
+function cn(...classes: (string | false | undefined)[]) { return classes.filter(Boolean).join(' ') }
+function Status({ children, tone = 'neutral' }: { children: React.ReactNode; tone?: 'green' | 'amber' | 'red' | 'neutral' }) { return <span className={cn('status', `status-${tone}`)}>{children}</span> }
+function Progress({ value, tone = 'green' }: { value: number; tone?: string }) { return <div className="progress"><div className={`progress-fill ${tone}`} style={{ width: `${Math.min(value, 100)}%` }} /></div> }
+function PageHeader({ eyebrow, title, subtitle, action }: { eyebrow: string; title: string; subtitle: string; action?: React.ReactNode }) { return <div className="page-header"><div><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p>{subtitle}</p></div>{action}</div> }
+
+function Dashboard() {
+  return <>
+    <PageHeader eyebrow="WEEK 1 · 7 DAYS" title="Mess planning overview" subtitle="Monitor cost, nutrition and the current weekly meal plan." action={<button className="icon-button"><MoreHorizontal size={18} /></button>} />
+    <div className="stat-grid">
+      {[['Students served', '500', 'Across the hostel', Users], ['Daily budget', '₹18,000', 'Per day target', CircleDollarSign], ["Today's cost", '₹16,420', '91% of budget', ClipboardList], ['Budget remaining', '₹1,580', 'Available today', BarChart3]].map(([label, value, hint, Icon]) => <div className="card stat-card" key={label as string}><div className="stat-top"><span>{label as string}</span><Icon size={17} /></div><strong>{value as string}</strong><small>{hint as string}</small></div>)}
+    </div>
+    <div className="content-grid">
+      <section className="card nutrition-card"><div className="section-heading"><div><h2>Nutrition coverage</h2><p>Current menu against daily targets</p></div><Link href="/nutrient-analyzer" className="text-link">View analysis <ArrowRight size={14} /></Link></div><div className="nutrition-list">{nutrients.slice(0, 4).map((n) => <div className="nutrition-row" key={n.label}><div className="nutrition-label"><span>{n.label}</span><b>{n.percent}%</b></div><Progress value={n.percent} tone={n.tone} /><div className="nutrition-meta"><span>{n.value}</span><span>of {n.target}</span><Status tone={n.tone === 'red' ? 'red' : n.percent >= 100 ? 'green' : 'amber'}>{n.percent >= 100 ? 'Good' : n.tone === 'red' ? 'Critical' : 'Needs attention'}</Status></div></div>)}</div></section>
+      <section className="card gap-card"><div className="gap-icon"><AlertTriangle size={19} /></div><div className="eyebrow">HIDDEN NUTRITION GAP</div><h2>Iron is below target</h2><p>Current coverage is <b>68%</b>, leaving a 3.84 mg daily deficit.</p><div className="gap-stats"><div><span>Current</span><b>8.16 mg</b></div><div><span>Target</span><b>12 mg</b></div><div><span>Coverage</span><b>68%</b></div></div><div className="callout"><Leaf size={15} /> Possible improvement: increase iron-rich foods such as legumes or leafy vegetables.</div><Link href="/menu-balancer" className="button button-dark">Open Menu Balancer <ArrowRight size={15} /></Link></section>
+    </div>
+    <section className="card weekly-card"><div className="section-heading"><div><h2>This week&apos;s menu</h2><p>Quick view of the planned meal schedule</p></div><Link href="/mess-menu" className="text-link">Edit menu <ArrowRight size={14} /></Link></div><div className="mini-menu">{menu.slice(0, 5).map(([day, ...meals]) => <div className="mini-day" key={day}><b>{day.slice(0, 3)}</b>{meals.map((meal) => <span key={meal}>{meal}</span>)}</div>)}</div></section>
+  </>
+}
+
+function FoodItems() {
+  const [foods, setFoods] = useState(foodsSeed); const [search, setSearch] = useState(''); const [showAdd, setShowAdd] = useState(false)
+  const filtered = useMemo(() => foods.filter((f) => f.name.toLowerCase().includes(search.toLowerCase())), [foods, search])
+  return <><PageHeader eyebrow="INVENTORY · 20 ITEMS" title="Food Items" subtitle="Manage food items, serving sizes, prices and nutrition information." action={<button className="button button-dark" onClick={() => setShowAdd(true)}><Plus size={16} /> Add food</button>} /><div className="toolbar"><div className="search"><Search size={16} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search food items..." /></div><button className="filter-button"><SlidersHorizontal size={15} /> All categories <ChevronDown size={14} /></button><span className="toolbar-count">{filtered.length} items</span></div><section className="card table-card"><table><thead><tr><th>Food</th><th>Category</th><th>Serving</th><th>Price</th><th>Available</th><th>Diet</th><th>Nutrition</th><th /></tr></thead><tbody>{filtered.map((food) => <tr key={food.name}><td><b>{food.name}</b></td><td>{food.category}</td><td>{food.serving}</td><td>₹{food.price}</td><td>{food.available}</td><td><Status tone="green">{food.diet}</Status></td><td><span className="nutrition-summary">{food.nutrition}</span></td><td><button className="table-action"><Edit3 size={15} /></button><button className="table-action danger" onClick={() => setFoods(foods.filter((f) => f.name !== food.name))}><Trash2 size={15} /></button></td></tr>)}</tbody></table></section>{showAdd && <div className="modal-backdrop" onClick={() => setShowAdd(false)}><div className="modal" onClick={(e) => e.stopPropagation()}><div className="modal-header"><div><div className="eyebrow">NEW INVENTORY ITEM</div><h2>Add food item</h2></div><button className="icon-button" onClick={() => setShowAdd(false)}><X size={18} /></button></div><div className="form-grid">{['Name', 'Category', 'Serving size', 'Unit', 'Price per unit', 'Available quantity'].map((label) => <label key={label}>{label}<input placeholder={label} /></label>)}</div><div className="modal-note"><Sparkles size={16} /> Nutrition can be estimated after adding this item.</div><div className="modal-actions"><button className="button button-ghost" onClick={() => setShowAdd(false)}>Cancel</button><button className="button button-dark" onClick={() => { setFoods([...foods, { name: 'New food item', category: 'Other', serving: '100 g', price: 10, available: '—', diet: 'Vegetarian', nutrition: 'AI estimate' }]); setShowAdd(false) }}>Add item</button></div></div></div>}</>
+}
+
+function MessMenu() { const [menuState, setMenuState] = useState(menu); return <><PageHeader eyebrow="WEEK 1 · 500 STUDENTS" title="Mess Menu" subtitle="Build and review the seven-day meal plan for your hostel." action={<button className="button button-dark" onClick={() => alert('Menu saved for Week 1')}><Check size={16} /> Save menu</button>} /><div className="menu-layout"><section className="card menu-card"><div className="section-heading"><div><h2>Weekly meal plan</h2><p>Select a food item for each meal slot.</p></div><Status tone="green">Within budget</Status></div><div className="menu-table"><div className="menu-head"><span>Day</span><span>Morning</span><span>Afternoon</span><span>Evening</span></div>{menuState.map((day, row) => <div className="menu-row" key={day[0]}><b>{day[0]}</b>{day.slice(1).map((meal, col) => <select key={`${row}-${col}`} value={meal} onChange={(e) => { const next = [...menuState]; next[row] = [...next[row]]; next[row][col + 1] = e.target.value; setMenuState(next) }}><option>{meal}</option><option>Rice + Dal</option><option>Chana Curry</option><option>Vegetable Curry</option><option>Curd + Banana</option></select>)}</div>)}</div></section><aside className="card summary-card"><div className="eyebrow">PLAN SUMMARY</div><h2>Week 1 totals</h2>{[['Daily cost', '₹16,420'], ['Weekly cost', '₹1,14,940'], ['Budget', '₹1,26,000'], ['Remaining', '₹11,060'], ['People served', '500']].map(([a, b]) => <div className="summary-line" key={a}><span>{a}</span><b>{b}</b></div>)}<div className="summary-status"><Check size={15} /> Within daily budget</div><div className="summary-tip"><Settings2 size={15} /><span>Costs and nutrition are calculated by the backend when connected.</span></div></aside></div></> }
+
+function Analyzer() { const [analyzed, setAnalyzed] = useState(false); return <><PageHeader eyebrow="CURRENT MENU · ANALYSIS" title="Nutrition Analyzer" subtitle="See what the current menu provides and where nutrition gaps are hidden." action={<button className="button button-dark" onClick={() => setAnalyzed(true)}><BarChart3 size={16} /> {analyzed ? 'Analysis updated' : 'Analyze current menu'}</button>} /><div className="analysis-top"><section className="card budget-panel"><div className="section-heading"><div><h2>Cost status</h2><p>Daily plan against allocated budget</p></div><Status tone="green">Within budget</Status></div><div className="budget-number"><b>₹16,420</b><span>/ ₹18,000</span></div><Progress value={91} /><div className="budget-foot"><span>₹1,580 remaining</span><span>91% used</span></div></section><section className="card overall-panel"><div className="eyebrow">OVERALL COVERAGE</div><div className="overall-number">91<span>%</span></div><p>Most nutrition targets are close, but iron needs attention.</p><Status tone="amber">Plan needs improvement</Status></section></div><section className="card table-card analysis-table"><div className="section-heading"><div><h2>Nutrition coverage</h2><p>Deterministic results from the current menu</p></div><span className="data-note"><Check size={13} /> Calculated data</span></div><table><thead><tr><th>Nutrient</th><th>Target</th><th>Current</th><th>Coverage</th><th>Status</th></tr></thead><tbody>{nutrients.map((n) => <tr key={n.label}><td><b>{n.label}</b></td><td>{n.target}</td><td>{n.value}</td><td><div className="coverage-cell"><Progress value={n.percent} tone={n.tone} /><b>{n.percent}%</b></div></td><td><Status tone={n.percent >= 100 ? 'green' : n.tone === 'red' ? 'red' : 'amber'}>{n.percent >= 100 ? 'Good' : n.tone === 'red' ? 'Needs attention' : 'Below target'}</Status></td></tr>)}</tbody></table></section><section className="card explanation"><div className="gap-icon"><AlertTriangle size={18} /></div><div><div className="eyebrow">HIDDEN GAP</div><h2>Iron coverage is the key issue</h2><p>The menu looks acceptable from a cost perspective, but iron is currently at 68% of the selected target.</p><div className="callout"><Sparkles size={15} /> AI explanation: Consider increasing iron-rich foods such as chana or leafy vegetables. This suggestion is not a guaranteed medical recommendation.</div></div></section></> }
+
+function Balancer() { const [applied, setApplied] = useState(false); return <><PageHeader eyebrow="OPTIMIZATION · BUDGET AWARE" title="Menu Balancer" subtitle="Find feasible menu changes that improve nutrition without hiding the cost trade-off." action={<button className="button button-dark" onClick={() => setApplied(false)}><Sparkles size={16} /> Find balanced alternatives</button>} />{applied ? <section className="card applied-card"><div className="success-mark"><Check size={22} /></div><div><div className="eyebrow">MENU UPDATED SUCCESSFULLY</div><h2>Balanced alternative applied</h2><p>Wednesday evening was updated from Vegetable Curry to Chana Curry.</p></div><div className="before-after"><div><span>Before</span><b>₹16,420/day</b><small>Iron 68%</small></div><ArrowRight size={20} /><div><span>After</span><b>₹16,720/day</b><small>Iron 86%</small></div></div><Link href="/mess-menu" className="button button-dark">Review updated menu <ArrowRight size={15} /></Link></section> : <><section className="card balancer-summary"><div><div className="eyebrow">CURRENT PLAN</div><h2>There is room to improve iron coverage</h2><p>We found a practical replacement that stays within budget, stock, dietary and kitchen constraints.</p></div><div className="balance-metrics"><div><span>Daily cost</span><b>₹16,420</b></div><div><span>Iron coverage</span><b className="text-red">68%</b></div><div><span>Budget left</span><b>₹1,580</b></div></div></section><section className="suggestion-list"><div className="section-heading"><div><h2>Recommended changes</h2><p>Choose an alternative to apply to the current menu.</p></div><Status tone="green">Feasible</Status></div><div className="card suggestion-card"><div className="suggestion-label">REPLACE <span>WEDNESDAY · EVENING</span></div><div className="swap"><div><small>Current</small><b>Vegetable Curry</b></div><ArrowRight size={18} /><div className="swap-new"><small>Suggested</small><b>Chana Curry</b></div></div><div className="impact-grid"><div><span>Additional cost</span><b>+₹300/day</b></div><div><span>Iron coverage</span><b>68% → 86%</b></div><div><span>Constraints</span><b className="constraint-list"><Check size={13} /> Budget · Stock · Dietary</b></div></div><button className="button button-dark" onClick={() => setApplied(true)}>Apply change <ArrowRight size={15} /></button></div></section></>}</> }
+
+export default function NutriPlanApp() { const pathname = usePathname(); const [mobileOpen, setMobileOpen] = useState(false); const page = pathname === '/food-items' ? <FoodItems /> : pathname === '/mess-menu' ? <MessMenu /> : pathname === '/nutrient-analyzer' ? <Analyzer /> : pathname === '/menu-balancer' ? <Balancer /> : <Dashboard />; const nav = [{ href: '/dashboard', label: 'Overview', icon: BarChart3 }, { href: '/food-items', label: 'Food Items', icon: Utensils }, { href: '/mess-menu', label: 'Mess Menu', icon: CalendarDays }, { href: '/nutrient-analyzer', label: 'Nutrient Analyzer', icon: Leaf }, { href: '/menu-balancer', label: 'Menu Balancer', icon: SlidersHorizontal }]; return <div className="app-shell"><button className="mobile-menu" onClick={() => setMobileOpen(!mobileOpen)}><Menu size={20} /></button><aside className={cn('sidebar', mobileOpen && 'sidebar-open')}><div className="brand"><div className="brand-mark"><Leaf size={17} /></div><span>NutriPlan</span></div><div className="nav-label">WORKSPACE</div><nav>{nav.map(({ href, label, icon: Icon }) => <Link key={href} href={href} className={pathname === href || (href === '/dashboard' && pathname === '/') ? 'active' : ''} onClick={() => setMobileOpen(false)}><Icon size={17} />{label}</Link>)}</nav><div className="sidebar-footer"><div className="profile-dot">CH</div><div><b>College Hostel</b><span>Week 1 planning</span></div><MoreHorizontal size={16} /></div></aside><main className="main-content">{page}<footer>NutriPlan · Institutional meal planning <span>Code calculates. AI explains. You decide.</span></footer></main></div> }
