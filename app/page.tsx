@@ -1,7 +1,12 @@
+import { BrowserRouter } from 'react-router-dom'
 import NutriPlanApp from '@/components/nutriplan-app'
 
 export default function Page() {
-  return <NutriPlanApp />
+  return (
+    <BrowserRouter>
+      <NutriPlanApp />
+    </BrowserRouter>
+  )
 }
 
 export const dynamic = 'force-dynamic'
